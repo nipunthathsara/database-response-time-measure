@@ -15,6 +15,10 @@
  */
 
 package org.wso2.dbresponemeasure;
+
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import java.io.File;
 import java.net.MalformedURLException;
 import java.net.URL;
@@ -29,6 +33,8 @@ import java.sql.SQLException;
  */
 public class DBConnection {
 
+    private static final Logger log = LoggerFactory.getLogger(DBConnection.class);
+
     /**
      * Static object of SQL connection.
      */
@@ -42,12 +48,12 @@ public class DBConnection {
      * @return database connection.
      */
     public static Connection getConnection(String url, String username, String password) {
+
         if (connection == null) {
             try {
                 connection = DriverManager.getConnection(url, username, password);
             } catch (SQLException e) {
-                System.out.println("Unable to connect to database.");
-                e.printStackTrace();
+                log.error("Unable to connect to database.", e);
                 return null;
             }
             return connection;
@@ -58,33 +64,29 @@ public class DBConnection {
 
     /**
      * Load JDBC driver.
-     * @param driverLoacation location of JAR file.
+     * @param driverLocation location of JAR file.
      * @param jdbcConnectionClass Connection classs name.
      */
-    public static void loadDBDriver(String driverLoacation, String jdbcConnectionClass) {
-        File file = new File(driverLoacation);
+    public static void loadDBDriver(String driverLocation, String jdbcConnectionClass) {
+
+        File file = new File(driverLocation);
         URL url = null;
         try {
             url = file.toURI().toURL();
         } catch (MalformedURLException e) {
-            System.out.printf("Unablto open url.");
-            e.printStackTrace();
+            log.error("Unable to open url.", e);
         }
         URLClassLoader ucl = new URLClassLoader(new URL[] {url});
         Driver driver = null;
         try {
             driver = (Driver) Class.forName(jdbcConnectionClass, true, ucl).newInstance();
-        } catch (InstantiationException e) {
-            e.printStackTrace();
-        } catch (IllegalAccessException e) {
-            e.printStackTrace();
-        } catch (ClassNotFoundException e) {
-            e.printStackTrace();
+        } catch (InstantiationException | IllegalAccessException | ClassNotFoundException e) {
+            log.error("Unable to load driver.", e);
         }
         try {
             DriverManager.registerDriver(new DriverShim(driver));
         } catch (SQLException e) {
-            e.printStackTrace();
+            log.error("Unable to register driver.", e);
         }
     }
 }
