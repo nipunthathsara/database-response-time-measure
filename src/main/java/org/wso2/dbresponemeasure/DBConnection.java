@@ -19,10 +19,6 @@ package org.wso2.dbresponemeasure;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import java.io.File;
-import java.net.MalformedURLException;
-import java.net.URL;
-import java.net.URLClassLoader;
 import java.sql.Connection;
 import java.sql.Driver;
 import java.sql.DriverManager;
@@ -69,19 +65,11 @@ public class DBConnection {
      */
     public static void loadDBDriver(String driverLocation, String jdbcConnectionClass) {
 
-        File file = new File(driverLocation);
-        URL url = null;
-        try {
-            url = file.toURI().toURL();
-        } catch (MalformedURLException e) {
-            log.error("Unable to open url.", e);
-        }
-        URLClassLoader ucl = new URLClassLoader(new URL[] {url});
         Driver driver = null;
         try {
-            driver = (Driver) Class.forName(jdbcConnectionClass, true, ucl).newInstance();
+            driver = (Driver) Class.forName(jdbcConnectionClass).newInstance();
         } catch (InstantiationException | IllegalAccessException | ClassNotFoundException e) {
-            log.error("Unable to load driver.", e);
+            log.error("Unable to load driver : " + jdbcConnectionClass , e);
         }
         try {
             DriverManager.registerDriver(new DriverShim(driver));

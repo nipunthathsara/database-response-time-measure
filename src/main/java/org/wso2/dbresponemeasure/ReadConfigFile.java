@@ -16,9 +16,13 @@
 
 package org.wso2.dbresponemeasure;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.InputStream;
+import java.nio.file.Paths;
 import java.util.Properties;
 
 /**
@@ -27,15 +31,16 @@ import java.util.Properties;
 public class ReadConfigFile {
     private Properties properties = new Properties();
 
+    private static final Logger log = LoggerFactory.getLogger(ReadConfigFile.class);
+
     /**
      * Read config.file.
      */
     public ReadConfigFile() {
-        try (InputStream input = new FileInputStream("config.properties")) {
+        try (InputStream input = new FileInputStream(Paths.get(".", "config.properties").toString())) {
             properties.load(input);
         } catch (IOException e) {
-            System.out.println("Can't find/read 'config.properties' file.");
-            e.printStackTrace();
+            log.error("Can't find/read 'config.properties' file.", e);
         }
     }
 
